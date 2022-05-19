@@ -264,28 +264,45 @@ class MuleBot:
 
   def forward(self, inches):
         revolutions = inches / MuleBot.CIRCUM_IN
-        
+
         rpm = MuleBot.MAX_RPM
-        
+
         minutes = revolutions / rpm
-        
+
         seconds = minutes * MuleBot.SECONDS_PER_MINUTE
-        
+
         v = self.rpm_to_rps(rpm)
+        self.motorsDirection('f')
         self.set_wheel_drive_rates(v, v)
-        
+
         time.sleep(seconds)
         self.stop()
-        
+
+  def backward(self, inches):
+        revolutions = inches / MuleBot.CIRCUM_IN
+
+        rpm = MuleBot.MAX_RPM
+
+        minutes = revolutions / rpm
+
+        seconds = minutes * MuleBot.SECONDS_PER_MINUTE
+
+        v = self.rpm_to_rps(rpm)
+        self.motorsDirection('r')
+        self.set_wheel_drive_rates(v, v)
+
+        time.sleep(seconds)
+        self.stop()
+
   def stop(self):
         v_l = 0
         v_r = 0
         self.set_wheel_drive_rates(v_l, v_r)
-    
+
   def u_turn(self, direction, diameter_in):
         """u_turn performs an 180 turn either to the 'left' or right based
         on the diameter of the turn in inches.
-        
+
         @type: string
         @param: direction
         
@@ -465,15 +482,15 @@ class MuleBot:
     direction -- single character
     """
 
-    print(direction)
+    #print(direction)
     if direction == 'r' or direction == 'R':
       self.motorDirection(self.motor1DirectionPin, self.motorReverse)
       #self.motorDirection(self.motor2DirectionPin, self.motorReverse)
-      print ("Direction reverse")
+      #print ("Direction reverse")
     else:
       self.motorDirection(self.motor1DirectionPin, self.motorForward)
       #self.motorDirection(self.motor2DirectionPin, self.motorForward)
-      print ("Direction forward")
+      #print ("Direction forward")
 
   def dcMotorLeftTurn(self, duration):
     """dcMotorLeftTurn"""

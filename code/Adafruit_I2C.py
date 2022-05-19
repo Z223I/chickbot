@@ -45,12 +45,12 @@ class Adafruit_I2C(object):
     # In the pop-up window, click on the ‘Interfaces’ tab and select the ‘Enable’ radio button for I2C.
     # Reboot
     # Reference: https://www.engineersgarage.com/articles-raspberry-pi-i2c-bus-pins-smbus-smbus2-python/
-    print(f"busnum: {busnum}")
+    #print(f"busnum: {busnum}")
     i2cBusNumber = Adafruit_I2C.getPiI2CBusNumber()
-    print(f"i2cBusNumber: {i2cBusNumber}")
+    #print(f"i2cBusNumber: {i2cBusNumber}")
 
     newbusnum = busnum if busnum >= 0 else Adafruit_I2C.getPiI2CBusNumber()
-    print(f"newbusnum: {newbusnum}")
+    #print(f"newbusnum: {newbusnum}")
 
     self.bus = smbus.SMBus(newbusnum)
     self.debug = debug
