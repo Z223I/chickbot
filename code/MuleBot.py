@@ -16,7 +16,7 @@ loggerMB = logging.getLogger(__name__)
 hdlr = logging.FileHandler('MuleBot.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
-loggerMB.addHandler(hdlr) 
+loggerMB.addHandler(hdlr)
 loggerMB.setLevel(logging.FATAL)
 
 
@@ -40,7 +40,7 @@ class MuleBot:
   INCHES_PER_METER = 39.3701
   CIRCUM_IN = RADIANS_IN_CIRCLE * math.pi * WHEEL_RADIUS
   CIRCUM_M = CIRCUM_IN / INCHES_PER_METER
-    
+
   dcMotorPWMDurationLeft = 0
   dcMotorPWMDurationRight = 0
 
@@ -239,7 +239,7 @@ class MuleBot:
   def set_wheel_drive_rates(self, v_l, v_r):
       #TODO Update this to handle nevative velocities.
 
-      """ set_wheel_drive_rates set the drive rates of the wheels to the 
+      """ set_wheel_drive_rates set the drive rates of the wheels to the
       specified velocities (rads/s).  The velocities are converted to RPM.
 
 
@@ -262,7 +262,7 @@ class MuleBot:
       self.motorSpeed(rpm_l, rpm_r)
       return rpm_l, rpm_r
 
-  def forward(self, inches):
+  def move(self, inches, direction='f'):
         revolutions = inches / MuleBot.CIRCUM_IN
 
         rpm = MuleBot.MAX_RPM
@@ -272,27 +272,18 @@ class MuleBot:
         seconds = minutes * MuleBot.SECONDS_PER_MINUTE
 
         v = self.rpm_to_rps(rpm)
-        self.motorsDirection('f')
+        self.motorsDirection(direction)
         self.set_wheel_drive_rates(v, v)
 
         time.sleep(seconds)
         self.stop()
+
+
+  def forward(self, inches):
+      self.move(inches, 'forward')
 
   def backward(self, inches):
-        revolutions = inches / MuleBot.CIRCUM_IN
-
-        rpm = MuleBot.MAX_RPM
-
-        minutes = revolutions / rpm
-
-        seconds = minutes * MuleBot.SECONDS_PER_MINUTE
-
-        v = self.rpm_to_rps(rpm)
-        self.motorsDirection('r')
-        self.set_wheel_drive_rates(v, v)
-
-        time.sleep(seconds)
-        self.stop()
+      self.move(inches, 'backward')
 
   def stop(self):
         v_l = 0
@@ -309,18 +300,18 @@ class MuleBot:
         @type: float
         @type: diameter_in
         """
-    
+
 #        pdb.set_trace()
         # Calculate radius of turn for the inside wheel.
         r_in = diameter_in / 2
 
         # Outside radius is 20 inches from inside radius.
         r_out = r_in + MuleBot.WHEEL_BASE_LENGTH
-        
+
         # Outside travel distance
         travel = r_out * 3.14159
         travel_revolutions = travel / MuleBot.CIRCUM_IN
-        
+
         r_ratio = r_out / r_in
         #r_ratio_half = r_ratio / 2
 
@@ -328,13 +319,13 @@ class MuleBot:
 
         outside_rpm = r_ratio * speed_multiplier
         inside_rpm = speed_multiplier
-            
-        
-        # 
+
+
+        #
         # minutes at outside_rpm
         minutes = travel_revolutions / outside_rpm
         seconds = minutes * MuleBot.SECONDS_PER_MINUTE
-        
+
         # Something isn't quite perfect.
         if direction == 'left':
             if diameter_in < 25:
@@ -356,7 +347,7 @@ class MuleBot:
 
         #print("2inside:   rpm: ", inside_rpm)
         #print("2outside:   rpm: ", outside_rpm)
-        
+
         #print("2.1:   v_l: ", v_l)
         #print("2.1:   v_r: ", v_r)
 
@@ -368,20 +359,20 @@ class MuleBot:
 
         # Stop
         self.stop()
-        
+
         # Move forward 24 inches.
         self.forward(24)
 
   def u_turn_supervisor(self, command):
-        __doc__ = """u_turn_supervisor parses u_turn commands and then 
+        __doc__ = """u_turn_supervisor parses u_turn commands and then
         calls u_turn.
-        
+
         Examples: 'ul10' makes a left-handed u_turn with a 10" diameter.
                    'ur40' makes a right-handed u_turn with a 40" diameter.
-                        
+
         @type: string
         @param: command"""
-    
+
         # strip the initial 'u'
         command = command[1:]
         if len(command) > 0:
@@ -389,19 +380,19 @@ class MuleBot:
                 direction = 'left'
             else:
                 direction = 'right'
-                
+
         # strip the direction
         command = command[1:]
 
         if len(command) > 0:
             diameter = int(command)
             self.u_turn(direction, diameter)
-                            
+
 
   def _uni_to_diff(self, v, omega):
 
     """
-    _uni_to_diff The is a "unicycle model".  It performs a unicycle to 
+    _uni_to_diff The is a "unicycle model".  It performs a unicycle to
     "differential drive model" mathematical translation.
 
     NB: The input/output variable are in DIFFERENT units!  This is because
@@ -459,12 +450,12 @@ class MuleBot:
   def motorDirection(self, motorPin, direction):
     """
     motorDirection sets the direction of a single motor.
-    
+
     Keyword arguments:
     motorPin -- Integer representing the direction pin for a specific motor.
-    
+
     direction -- Single bit representing fowards or backwards.
-    
+
     Usage:
         self.motorDirection(self.motor1DirectionPin, self.motorReverse)
     """
@@ -477,13 +468,14 @@ class MuleBot:
   def motorsDirection(self, direction):
     """
     motorsDirection sets the direction of both motors to the same direction.
-    
+
     Keyword arguments:
     direction -- single character
     """
 
+    direction = direction.lower()
     #print(direction)
-    if direction == 'r' or direction == 'R':
+    if direction in ['r', 'reverse', 'b', 'backward']:
       self.motorDirection(self.motor1DirectionPin, self.motorReverse)
       self.motorDirection(self.motor2DirectionPin, self.motorReverse)
       #print ("Direction reverse")
@@ -499,7 +491,7 @@ class MuleBot:
     tempPWMDurationLeft = int( MuleBot.dcMotorPWMDurationLeft * 70 / 100 )  # 98
     self.pwm.setPWM(self.dcMotorLeftMotor, 0, tempPWMDurationLeft)
 
-    # Duration of the turn  
+    # Duration of the turn
     time.sleep(duration)
 
     # Go straight
@@ -512,7 +504,7 @@ class MuleBot:
     tempPWMDurationRight = int( MuleBot.dcMotorPWMDurationRight * 70 / 100 )
     self.pwm.setPWM(self.dcMotorRightMotor, 0, tempPWMDurationRight)
 
-    # Duration of the turn  
+    # Duration of the turn
     time.sleep(duration)
 
     # Go straight
@@ -688,7 +680,7 @@ class MuleBot:
                       # Reset the time
                       timeInLeftTurn = 0
                   print ("On path.")
-          # end if 
+          # end if
 
           _q1.task_done()
 
@@ -757,7 +749,7 @@ class MuleBot:
 
   def velocity_check(self, v_l, v_r):
       """velocity_check slows down the velocities of the two wheels to stay
-      between +-MAX_RPS. 
+      between +-MAX_RPS.
 
 
       @type: float
@@ -908,7 +900,7 @@ class MuleBot:
 
       target_range = 0
       target_width = 0
-    
+
       navigating = False
       was_navigating = False
 
@@ -934,7 +926,7 @@ class MuleBot:
           if navigating and not was_navigating:
             q_water_pump.put('won')
             was_navigating = True
-            
+
           if navigating:
 #              v = self.v()
 #              print("aMuleBot.lidarNav: v (m/s): ", v)
@@ -969,7 +961,7 @@ class MuleBot:
                       q_water_pump.put('woff')
                       navigating = False
                       was_navigating = False
-                    
+
                   # Is a turn required?
                   if target_range > 0 and not (angle_rad == 0):
 
@@ -1054,7 +1046,7 @@ class MuleBot:
                             target_width = int(target_width)
 #                            print("Target width: ", target_width)
                             q_lidar_nav.put( 'w' + str(target_width) )
-                        
+
                     # end if
 
 
@@ -1132,7 +1124,7 @@ class MuleBot:
 
           Arguments:  self
 
-          Purpose:  laserNav 
+          Purpose:  laserNav
 
       """
 
@@ -1145,7 +1137,7 @@ class MuleBot:
               if not (lastCommand == None):
                   # There is a time and command.
 
-                  # Check if at least 30 seconds have passed since 
+                  # Check if at least 30 seconds have passed since
                   # last state change.
                   TIME_TO_WAIT = 30   # Seconds
                   currentTime = time.time() # Seconds
