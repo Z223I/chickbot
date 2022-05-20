@@ -61,7 +61,7 @@ class MuleBot:
 
     self.pwmEnablePin       = 23 # Broadcom pin 23 was 16
     self.motor1DirectionPin = 24 # Broadcom pin 24 was 20
-    #self.motor2DirectionPin = 25 # Broadcom pin 25 was 21
+    self.motor2DirectionPin = 25 # Broadcom pin 25 was 21
 
     self.motorForward = GPIO.HIGH
     self.motorReverse = GPIO.LOW
@@ -81,7 +81,7 @@ class MuleBot:
     GPIO.setmode(GPIO.BCM) # Broadcom pin-numbering scheme
     GPIO.setup(self.pwmEnablePin,       GPIO.OUT)
     GPIO.setup(self.motor1DirectionPin, GPIO.OUT)
-    #GPIO.setup(self.motor2DirectionPin, GPIO.OUT)
+    GPIO.setup(self.motor2DirectionPin, GPIO.OUT)
 
     GPIO.output(self.pwmEnablePin,       GPIO.LOW )
 
@@ -305,7 +305,7 @@ class MuleBot:
 
         @type: string
         @param: direction
-        
+
         @type: float
         @type: diameter_in
         """
@@ -485,11 +485,11 @@ class MuleBot:
     #print(direction)
     if direction == 'r' or direction == 'R':
       self.motorDirection(self.motor1DirectionPin, self.motorReverse)
-      #self.motorDirection(self.motor2DirectionPin, self.motorReverse)
+      self.motorDirection(self.motor2DirectionPin, self.motorReverse)
       #print ("Direction reverse")
     else:
       self.motorDirection(self.motor1DirectionPin, self.motorForward)
-      #self.motorDirection(self.motor2DirectionPin, self.motorForward)
+      self.motorDirection(self.motor2DirectionPin, self.motorForward)
       #print ("Direction forward")
 
   def dcMotorLeftTurn(self, duration):
