@@ -19,7 +19,7 @@ hdlr.setFormatter(formatter)
 loggerMB.addHandler(hdlr)
 loggerMB.setLevel(logging.FATAL)
 
-
+PI = 3.141592653589793
 
 class MuleBot:
 
@@ -30,7 +30,7 @@ class MuleBot:
   WHEEL_RADIUS = 2
   # Apparently, in the robot world, the distrance between the two motor
   # driven wheels is called wheel base length.
-  WHEEL_BASE_LENGTH = 20
+  WHEEL_BASE_LENGTH = 55
   SECONDS_PER_MINUTE = 60
   MAX_RPM = 12
   RADIANS_IN_CIRCLE = 2.0
@@ -263,20 +263,19 @@ class MuleBot:
       return rpm_l, rpm_r
 
   def move(self, inches, direction='f'):
-        revolutions = inches / MuleBot.CIRCUM_IN
+      self.stop()
 
-        rpm = MuleBot.MAX_RPM
+      revolutions = inches / MuleBot.CIRCUM_IN
+      rpm = MuleBot.MAX_RPM
+      minutes = revolutions / rpm
+      seconds = minutes * MuleBot.SECONDS_PER_MINUTE
 
-        minutes = revolutions / rpm
+      v = self.rpm_to_rps(rpm)
+      self.motorsDirection(direction)
+      self.set_wheel_drive_rates(v, v)
 
-        seconds = minutes * MuleBot.SECONDS_PER_MINUTE
-
-        v = self.rpm_to_rps(rpm)
-        self.motorsDirection(direction)
-        self.set_wheel_drive_rates(v, v)
-
-        time.sleep(seconds)
-        self.stop()
+      time.sleep(seconds)
+      self.stop()
 
 
   def forward(self, inches):
@@ -289,6 +288,71 @@ class MuleBot:
         v_l = 0
         v_r = 0
         self.set_wheel_drive_rates(v_l, v_r)
+
+  def turn(self, direction, degrees):
+      """
+      Performs a turn either to the left or right.
+      It should "turn on a dime."
+
+      @param: direction
+      @type: string
+
+      @param: degrees
+      @type: float
+      """
+
+      # Stop the wheels.
+      self.stop()
+
+      if direction.lower() in ['l', 'left']:
+        direction = 'left'
+      elif direction.lower() in ['r', 'right']:
+        direction = 'right'
+      else:
+        print(f"ERROR:  Invalid direction: {direction}")
+        import sys
+        sys.exit(-1)
+
+      # Calculate radius of turn.  This is correct for turning in-place.
+      r_in = MuleBot.WHEEL_BASE_LENGTH / 2
+
+      # They are the same for turning on a dime.
+      r_out = r_in
+
+      # Travel distance
+      travel = r_out * PI
+      travel_revolutions = travel / MuleBot.CIRCUM_IN
+
+      rpm = MuleBot.MAX_RPM
+
+      #
+      # minutes at rpm.
+      minutes = travel_revolutions / rpm
+      seconds = minutes * MuleBot.SECONDS_PER_MINUTE
+
+      if direction == 'left':
+          # M1 forward
+          # M2 reverse
+          self.motorDirection(self.motor1DirectionPin, self.motorForward)
+          self.motorDirection(self.motor2DirectionPin, self.motorReverse)
+      else:
+          # M1 reverse
+          # M2 forward
+          self.motorDirection(self.motor1DirectionPin, self.motorReverse)
+          self.motorDirection(self.motor2DirectionPin, self.motorForward)
+
+
+      v_r = self.rpm_to_rps(rpm)
+      v_l = self.rpm_to_rps(rpm)
+
+      # Set wheel drive rates.
+      self.set_wheel_drive_rates(v_l, v_r)
+
+      # Sleep during the turn.
+      time.sleep(seconds)
+
+      # Stop
+      self.stop()
 
   def u_turn(self, direction, diameter_in):
         """u_turn performs an 180 turn either to the 'left' or right based
@@ -309,7 +373,7 @@ class MuleBot:
         r_out = r_in + MuleBot.WHEEL_BASE_LENGTH
 
         # Outside travel distance
-        travel = r_out * 3.14159
+        travel = r_out * PI
         travel_revolutions = travel / MuleBot.CIRCUM_IN
 
         r_ratio = r_out / r_in
