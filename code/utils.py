@@ -20,7 +20,9 @@ def back(inches):
     print(f"ChickBot moved backward {inches} inches.")
 
 def right(degrees):
+    bot.turn('right', degrees)
     print(f"ChickBot turned right {degrees} degrees")
 
 def left(degrees):
+    bot.turn('left', degrees)
     print(f"ChickBot turned left {degrees} degrees")
