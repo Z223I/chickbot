@@ -19,7 +19,7 @@ hdlr.setFormatter(formatter)
 loggerMB.addHandler(hdlr)
 loggerMB.setLevel(logging.FATAL)
 
-PI = 3.141592653589793
+PI = math.pi
 
 class MuleBot:
 
@@ -320,7 +320,10 @@ class MuleBot:
       r_out = r_in
 
       # Travel distance
-      travel = r_out * PI
+      #travel = r_out * PI # This was for a U-turn.
+      radians = math.radians(degrees)
+      travel = r_out * math.sin(radians) * (PI / 2.0)
+
       travel_revolutions = travel / MuleBot.CIRCUM_IN
 
       rpm = MuleBot.MAX_RPM
