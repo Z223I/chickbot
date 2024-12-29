@@ -79,6 +79,7 @@ class MuleBot:
     # Pin Setup:
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM) # Broadcom pin-numbering scheme
+    print(f"pwmEnablePin: {self.pwmEnablePin}")
     GPIO.setup(self.pwmEnablePin,       GPIO.OUT)
     GPIO.setup(self.motor1DirectionPin, GPIO.OUT)
     GPIO.setup(self.motor2DirectionPin, GPIO.OUT)
